@@ -54,7 +54,7 @@ won't work until after the full install so you can ignore that if you source it 
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export ESP_ROOT=~/packages/ESP123/EngSketchPad
 export PYTHONPATH=${PYTHONPATH}:$ESP_ROOT/pyESP
 source $ESP_ROOT/ESPenv.sh
-alias csm=&#39;$ESP_ROOT/bin/serveCSM&#39;
+alias csm='$ESP_ROOT/bin/serveCSM'
 </pre></div>
 </div>
 <p>The installation on a Linux machine proceeds as follows. Note if the ESP/OpenCASCADE version changes
@@ -106,7 +106,7 @@ Important things to include in your CSM file are included below (for reference s
 <p>The main <code class="docutils literal notranslate"><span class="pre">TacsModel</span></code> object supervises the process of TACS analysis and geometry updates for optimization.
 Caps2tacs supports MPI / parallel processing which is a feature not directly available in ESP/CAPS.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
-<span class="n">tacs_model</span> <span class="o">=</span> <span class="n">caps2tacs</span><span class="o">.</span><span class="n">TacsModel</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">csm_file</span><span class="o">=</span><span class="s2">&quot;simple_naca_wing.csm&quot;</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">tacs_model</span> <span class="o">=</span> <span class="n">caps2tacs</span><span class="o">.</span><span class="n">TacsModel</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">csm_file</span><span class="o">=</span><span class="s2">"simple_naca_wing.csm"</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Next, the user must specify the auto mesh generation settings for the structure geometry that will be
@@ -165,15 +165,13 @@ Finally the routine <code class="docutils literal notranslate"><span class="pre"
 <section id="examples">
 <h1>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h1>
 <p>The main caps2tacs example is in the directory <code class="docutils literal notranslate"><span class="pre">./examples/caps_wing/</span></code>, with five analyses
-on a coarse mesh of a symmetric NACA 0012 wing structure.
-1. A steady analysis, using the EGADS AIM for meshing, with a vertical distributed load.
-2. An unsteady analysis with a vertical distributed load varying sinusoidally in time.
-3. A sizing optimization which finds the optimal panel thicknesses to hold fixed aero loads.
-4. A sizing and shape optimization which optimizes the panel thicknesses and location of ribs</p>
-<blockquote>
-<div><p>and spars inside the wing to hold fixed aero loads.</p>
-</div></blockquote>
-<ol class="arabic simple" start="5">
+on a coarse mesh of a symmetric NACA 0012 wing structure.</p>
+<ol class="arabic simple">
+<li><p>A steady analysis, using the EGADS AIM for meshing, with a vertical distributed load.</p></li>
+<li><p>An unsteady analysis with a vertical distributed load varying sinusoidally in time.</p></li>
+<li><p>A sizing optimization which finds the optimal panel thicknesses to hold fixed aero loads.</p></li>
+<li><p>A sizing and shape optimization which optimizes the panel thicknesses and location of ribs
+and spars inside the wing to hold fixed aero loads.</p></li>
 <li><p>A steady analysis, using the AFLR AIM for meshing, with a vertical distributed load.</p></li>
 </ol>
 <p>The sizing optimization shown below resulted in about a 40% drop in weight from the equal thickness design. Notice

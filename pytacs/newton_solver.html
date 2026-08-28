@@ -64,50 +64,50 @@ The following options, their default values and descriptions are listed below:</
 +----------------------------------------+
 |     NewtonSolver default options:      |
 +----------------------------------------+
-&#39;MaxIter&#39;: 40
+'MaxIter': 40
 	 Maximum number of Newton iterations.
-&#39;ForceFirstIter&#39;: False
+'ForceFirstIter': False
 	 Force the solver to perform the first Newton iteration, even if the convergence criteria are satisfied at the initial point.
-&#39;AbsTol&#39;: 1e-08
+'AbsTol': 1e-08
 	 Convergence criteria for the nonlinear residual norm.
-&#39;RelTol&#39;: 1e-08
+'RelTol': 1e-08
 	 Relative convergence criteria for the nonlinear residual norm, norm is measured relative to that of the external load vector.
-&#39;DivergenceTol&#39;: 10000000000.0
+'DivergenceTol': 10000000000.0
 	 Residual norm at which the nonlinear solver is jugded to have diverged
-&#39;AbsLinTol&#39;: 1e-12
+'AbsLinTol': 1e-12
 	 Linear solver residual tolerance.
-&#39;RelLinTol&#39;: 1e-12
+'RelLinTol': 1e-12
 	 Linear solver relative residual tolerance.
-&#39;MaxLinIters&#39;: 0
+'MaxLinIters': 0
 	 If the linear solver takes more than this number of iterations to converge, the preconditioner is updated.
-&#39;UseEW&#39;: False
+'UseEW': False
 	 Flag for enabling use of adaptive linear solver convergence using the Eisenstat-Walker method.
-&#39;EWMaxTol&#39;: 0.01
+'EWMaxTol': 0.01
 	 Eisenstat-Walker max allowable linear solver tolerance.
-&#39;EWGamma&#39;: 1.0
+'EWGamma': 1.0
 	 Eisenstat-Walker gamma parameter.
-&#39;EWAlpha&#39;: 1.618033988749895
+'EWAlpha': 1.618033988749895
 	 Eisenstat-Walker alpha parameter.
-&#39;UseLineSearch&#39;: True
+'UseLineSearch': True
 	 Flag for using line search in the nonlinear solver.
-&#39;PrintLineSearchIters&#39;: False
+'PrintLineSearchIters': False
 	 Flag for printing out line search information.
-&#39;SkipFirstNLineSearch&#39;: 0
+'SkipFirstNLineSearch': 0
 	 Skip the first N line searches. Setting this to 1 can improve the convergence speed of Newton solver, but also decreases robustness
-&#39;LineSearchMaxIter&#39;: 25
+'LineSearchMaxIter': 25
 	 Maximum number of linesearch iterations.
-&#39;LineSearchExpectedDecrease&#39;: 0.0001
+'LineSearchExpectedDecrease': 0.0001
 	 Minimum fraction of the expected decrease in the energy gradient during the linesearch. Should be between 0 and 1. Higher values should improve robustness at the expense of solution time.
-&#39;LineSearchMaxStep&#39;: 2.0
+'LineSearchMaxStep': 2.0
 	 Maximum step size for the linesearch, as a fraction of the Newton step
-&#39;LineSearchMinStep&#39;: 0.01
+'LineSearchMinStep': 0.01
 	 Minimum step size for the linesearch, as a fraction of the Newton step
-&#39;LineSearchMaxStepChange&#39;: 0.5
+'LineSearchMaxStepChange': 0.5
 	 Maximum change in the step size from one linesearch iteration to the next, can be useful in cases where secant method bounces between upper and lower step bounds.
-&#39;LineSearchFallbackStepLimit&#39;: 0.9
+'LineSearchFallbackStepLimit': 0.9
 	 Often, the value of the merit function at the Newton step (alpha = 1.0), is orders of magnitude greater than at the start point. In these situations, the linesearch then tries to evaluate a point with a very small step size, which usually meets the expected decrease criteria but results in very slow progress of the Newton solver. To combat this, this value limits how far the linesearch can backtrack on the first iteration after evaluating alpha = 1. This has the effect of encouraging the linesearch to find larger steps that meet the expected decrease criterion, which results in faster convergence of the Newton solver.
-&#39;monitorVars&#39;: [&#39;linSolverIters&#39;, &#39;linSolverRes&#39;, &#39;lineSearchStep&#39;, &#39;lineSearchIters&#39;]
-	 List of variables to include in nonlinear solver monitor output. Choose from &#39;linSolverIters&#39;, &#39;linSolverRes&#39;, &#39;lineSearchStep&#39;, &#39;EWTol&#39;, and &#39;lineSearchIters&#39;.
+'monitorVars': ['linSolverIters', 'linSolverRes', 'lineSearchStep', 'lineSearchIters']
+	 List of variables to include in nonlinear solver monitor output. Choose from 'linSolverIters', 'linSolverRes', 'lineSearchStep', 'EWTol', and 'lineSearchIters'.
 </pre></div>
 </div>
 </section>
@@ -199,7 +199,7 @@ The problem's state is updated with the solution whether or not this is provided
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>src</strong> (<em>tacs.TACS.Vec</em>) -- Vector to copy values from</p></li>
-<li><p><strong>dest</strong> (<em>tacs.TACS.Vec</em><em> or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>numpy.ndarray</em></a>) -- Vector/array to copy values into</p></li>
+<li><p><strong>dest</strong> (<em>tacs.TACS.Vec</em><em> or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>numpy.ndarray</em></a>) -- Vector/array to copy values into</p></li>
 </ul>
 </dd>
 </dl>
@@ -212,7 +212,7 @@ The problem's state is updated with the solution whether or not this is provided
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>src</strong> (<em>tacs.TACS.Vec</em><em> or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>numpy.ndarray</em></a><em> or </em><em>scalar</em>) -- Vector/array to copy values from</p></li>
+<li><p><strong>src</strong> (<em>tacs.TACS.Vec</em><em> or </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>numpy.ndarray</em></a><em> or </em><em>scalar</em>) -- Vector/array to copy values from</p></li>
 <li><p><strong>dest</strong> (<em>tacs.TACS.Vec</em>) -- Vector to copy into</p></li>
 </ul>
 </dd>
@@ -242,6 +242,12 @@ fatal failure in the solver which requires a full reset</p>
 <dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- Name of option to get</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tacs.solvers.NewtonSolver.getOptions">
+<span class="sig-name descname"><span class="pre">getOptions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tacs.solvers.NewtonSolver.getOptions" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of all current options in use.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -363,6 +369,7 @@ Where:
 <li><a class="reference internal" href="#tacs.solvers.NewtonSolver.dtype"><code class="docutils literal notranslate"><span class="pre">NewtonSolver.dtype</span></code></a></li>
 <li><a class="reference internal" href="#tacs.solvers.NewtonSolver.fatalFailure"><code class="docutils literal notranslate"><span class="pre">NewtonSolver.fatalFailure</span></code></a></li>
 <li><a class="reference internal" href="#tacs.solvers.NewtonSolver.getOption"><code class="docutils literal notranslate"><span class="pre">NewtonSolver.getOption()</span></code></a></li>
+<li><a class="reference internal" href="#tacs.solvers.NewtonSolver.getOptions"><code class="docutils literal notranslate"><span class="pre">NewtonSolver.getOptions()</span></code></a></li>
 <li><a class="reference internal" href="#tacs.solvers.NewtonSolver.hasConverged"><code class="docutils literal notranslate"><span class="pre">NewtonSolver.hasConverged</span></code></a></li>
 <li><a class="reference internal" href="#tacs.solvers.NewtonSolver.initializeSolve"><code class="docutils literal notranslate"><span class="pre">NewtonSolver.initializeSolve()</span></code></a></li>
 <li><a class="reference internal" href="#tacs.solvers.NewtonSolver.iterationCount"><code class="docutils literal notranslate"><span class="pre">NewtonSolver.iterationCount</span></code></a></li>
