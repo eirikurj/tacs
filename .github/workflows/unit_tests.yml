@@ -54,5 +54,5 @@ jobs:
             echo "################ $variant"
             vars=""; [ "$variant" != baseline ] && vars="$variant"
             env $vars OPENBLAS_VERBOSE=2 mpirun -n 2 -x OPENBLAS_VERBOSE -x OPENBLAS_CORETYPE -x OMP_NUM_THREADS \
-              python debug/trans_beam_driver.py 2>&1 | grep -vE "^\s*$" | grep -E "FUNC|Core:|####|NaN|failed|^ *[0-9]+ +[-0-9.e+naNinf]+ " | head -120
+              python dbg_scripts/trans_beam_driver.py 2>&1 | grep -vE "^\s*$" | grep -E "FUNC|Core:|####|NaN|failed|^ *[0-9]+ +[-0-9.e+naNinf]+ " | head -120
           done
