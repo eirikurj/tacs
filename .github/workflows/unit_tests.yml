@@ -41,8 +41,10 @@ jobs:
       matrix:
         include:
           # real versions
+          # Pinned to 24.04: on the ubuntu-26.04 image that ubuntu-latest now maps to,
+          # several total-sensitivity integration tests fail their FD/CS checks.
           - NAME: Real-Ubuntu
-            OS: ubuntu-latest
+            OS: ubuntu-24.04
             OPTIONAL: 'debug'
             INTERFACE: 'interface'
             PUBLISH_DOCS: true
@@ -55,7 +57,7 @@ jobs:
 
           # complex versions
           - NAME: Complex-Ubuntu
-            OS: ubuntu-latest
+            OS: ubuntu-24.04
             OPTIONAL: 'complex_debug'
             INTERFACE: 'complex_interface'
             PUBLISH_DOCS: false
@@ -102,7 +104,7 @@ jobs:
           echo "TACS_DIR=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
           conda install -c conda-forge mamba -q -y;
           mamba install -c conda-forge pip;
-          if [[ ${{ matrix.OS }} == 'ubuntu-latest' ]]; then
+          if [[ ${{ runner.os }} == 'Linux' ]]; then
             mamba install -c conda-forge sysroot_linux-64=2.17 -q -y;
             mamba install -c conda-forge openblas -q -y;
           else
