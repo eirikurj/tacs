@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rep: [1, 2, 3]
+        rep: [1, 2]
     name: Debug trans_beam r${{ matrix.rep }}
     steps:
       - uses: actions/checkout@v7
@@ -45,14 +45,22 @@ jobs:
           make debug TACS_DIR=$TACS_DIR METIS_INCLUDE=-I${CONDA_PREFIX}/include/ METIS_LIB="-L${CONDA_PREFIX}/lib/ -lmetis" -j4;
           make interface;
           mamba install -c conda-forge "petsc>=3.19,!=3.22.3" petsc4py "numpy>=2" -q -y;
+      - name: Rebuild with GMRES monitor on
+        run: |
+          sed -i 's#^  // ksm->setMonitor(new KSMPrintStdout("GMRES", 0, 1));#  ksm->setMonitor(new KSMPrintStdout("GMRES", 0, 1));#' src/TACSIntegrator.cpp
+          grep -n 'ksm->setMonitor' src/TACSIntegrator.cpp
+          make debug TACS_DIR=$TACS_DIR METIS_INCLUDE=-I${CONDA_PREFIX}/include/ METIS_LIB="-L${CONDA_PREFIX}/lib/ -lmetis" -j4 > /dev/null; make interface > /dev/null
       - name: Locate NaN
         run: |
           set +e +o pipefail
           lscpu | grep "Model name"; echo "avx512f cpus: $(grep -c avx512f /proc/cpuinfo)"
           cd $TACS_DIR
-          for variant in "baseline" "OPENBLAS_CORETYPE=Haswell" "OMP_NUM_THREADS=1"; do
+          for variant in "baseline" "TB_TOL=1e-12"; do
             echo "################ $variant"
             vars=""; [ "$variant" != baseline ] && vars="$variant"
-            env $vars OPENBLAS_VERBOSE=2 mpirun -n 2 -x OPENBLAS_VERBOSE -x OPENBLAS_CORETYPE -x OMP_NUM_THREADS \
-              python dbg_scripts/trans_beam_driver.py 2>&1 | grep -vE "^\s*$" | grep -E "FUNC|Core:|####|NaN|failed|^ *[0-9]+ +[-0-9.e+naNinf]+ " | head -120
+            env $vars OPENBLAS_VERBOSE=2 mpirun -n 2 -x OPENBLAS_VERBOSE -x TB_TOL \
+              python dbg_scripts/trans_beam_driver.py > /tmp/out_${variant//[^A-Za-z0-9]/_}.txt 2>&1
+            grep -E "FUNC" /tmp/out_${variant//[^A-Za-z0-9]/_}.txt
+            # context: Newton + GMRES lines leading into the first blow-up
+            awk '/PERTURBED/{f=1} f' /tmp/out_${variant//[^A-Za-z0-9]/_}.txt | grep -nE "GMRES|^ *[0-9]+ +[-0-9.e+naNinf]+ |NaN" | grep -B60 -m1 -E "e\+[2-9][0-9]|nan" | tail -70
           done

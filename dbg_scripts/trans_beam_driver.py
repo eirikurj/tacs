@@ -1,5 +1,6 @@
 """Replay test_trans_beam xpt FD check with the integrator Newton log on the perturbed solve."""
 
+import os
 import sys
 
 import numpy as np
@@ -12,6 +13,11 @@ case = t.ProblemTest("test_total_xpt_sensitivities")
 case.setUp()
 f0 = case.run_solve()
 case.run_sensitivities(includeXptSens=True)
+tol = os.environ.get("TB_TOL")
+if tol:
+    for prob in case.tacs_probs:
+        prob.integrator.setAbsTol(float(tol))
+        prob.integrator.setRelTol(float(tol))
 for prob in case.tacs_probs:
     prob.setOption("printLevel", 2 if prob.name == "sinusoid" else 0)
     prob.integrator.setPrintLevel(2 if prob.name == "sinusoid" else 0)
