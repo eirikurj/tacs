@@ -1,6 +1,7 @@
 name: Build, unit tests, and docs
 
-# DEBUG workflow: locate the NaN in test_trans_beam's perturbed sinusoid solve on ubuntu-26.04.
+# DEBUG workflow: capture the exact CI build of TACS that produces the NaN in
+# test_trans_beam's perturbed sinusoid solve, so it can be replayed locally.
 on:
   workflow_dispatch:
 
@@ -15,11 +16,7 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
-    strategy:
-      fail-fast: false
-      matrix:
-        rep: [1, 2]
-    name: Debug trans_beam r${{ matrix.rep }}
+    name: Capture trans_beam build
     steps:
       - uses: actions/checkout@v7
       - name: Setup miniconda
@@ -33,6 +30,7 @@ jobs:
         run: |
           export TACS_DIR=${GITHUB_WORKSPACE};
           echo "TACS_DIR=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+          mkdir -p $TACS_DIR/capture
           conda install -c conda-forge mamba -q -y;
           mamba install -c conda-forge pip;
           mamba install -c conda-forge sysroot_linux-64=2.17 -q -y;
@@ -40,27 +38,43 @@ jobs:
           mamba install -c conda-forge openmpi openmpi-mpicxx -q -y;
           mamba install -c conda-forge lapack -q -y;
           mamba install -c conda-forge metis=5.1.0 -q -y;
+          conda list --explicit > $TACS_DIR/capture/env_at_build.txt
           cd $TACS_DIR;
           cp Makefile.in.info Makefile.in;
-          make debug TACS_DIR=$TACS_DIR METIS_INCLUDE=-I${CONDA_PREFIX}/include/ METIS_LIB="-L${CONDA_PREFIX}/lib/ -lmetis" -j4;
-          make interface;
+          make debug TACS_DIR=$TACS_DIR METIS_INCLUDE=-I${CONDA_PREFIX}/include/ METIS_LIB="-L${CONDA_PREFIX}/lib/ -lmetis" -j4 2>&1 | tee $TACS_DIR/capture/build_lib.log;
+          make interface 2>&1 | tee $TACS_DIR/capture/build_interface.log;
           mamba install -c conda-forge "petsc>=3.19,!=3.22.3" petsc4py "numpy>=2" -q -y;
-      - name: Rebuild with GMRES monitor on
+          conda list --explicit > $TACS_DIR/capture/env_at_run.txt
+      - name: Record toolchain
         run: |
-          sed -i 's#^  // ksm->setMonitor(new KSMPrintStdout("GMRES", 0, 1));#  ksm->setMonitor(new KSMPrintStdout("GMRES", 0, 1));#' src/TACSIntegrator.cpp
-          grep -n 'ksm->setMonitor' src/TACSIntegrator.cpp
-          make debug TACS_DIR=$TACS_DIR METIS_INCLUDE=-I${CONDA_PREFIX}/include/ METIS_LIB="-L${CONDA_PREFIX}/lib/ -lmetis" -j4 > /dev/null; make interface > /dev/null
-      - name: Locate NaN
+          set +e
+          cd $TACS_DIR/capture
+          {
+            echo "CONDA_PREFIX=$CONDA_PREFIX"; uname -a; cat /etc/os-release | head -3
+            echo "--- mpicxx"; which mpicxx; mpicxx --showme; mpicxx --version
+            echo "--- g++"; which -a g++ c++; g++ --version
+            echo "--- python"; which python; python -VV
+            echo "--- ldd libtacs.so"; ldd $TACS_DIR/lib/libtacs.so
+            echo "--- ldd TACS ext"; ldd $TACS_DIR/tacs/TACS*.so
+            echo "--- env diff build->run"; diff env_at_build.txt env_at_run.txt
+          } > toolchain.txt 2>&1
+          cat toolchain.txt
+      - name: Run driver
         run: |
           set +e +o pipefail
-          lscpu | grep "Model name"; echo "avx512f cpus: $(grep -c avx512f /proc/cpuinfo)"
+          lscpu | grep "Model name"
           cd $TACS_DIR
-          for variant in "baseline" "TB_TOL=1e-12"; do
-            echo "################ $variant"
-            vars=""; [ "$variant" != baseline ] && vars="$variant"
-            env $vars OPENBLAS_VERBOSE=2 mpirun -n 2 -x OPENBLAS_VERBOSE -x TB_TOL \
-              python dbg_scripts/trans_beam_driver.py > /tmp/out_${variant//[^A-Za-z0-9]/_}.txt 2>&1
-            grep -E "FUNC" /tmp/out_${variant//[^A-Za-z0-9]/_}.txt
-            # context: Newton + GMRES lines leading into the first blow-up
-            awk '/PERTURBED/{f=1} f' /tmp/out_${variant//[^A-Za-z0-9]/_}.txt | grep -nE "GMRES|^ *[0-9]+ +[-0-9.e+naNinf]+ |NaN" | grep -B60 -m1 -E "e\+[2-9][0-9]|nan" | tail -70
-          done
+          OPENBLAS_VERBOSE=2 mpirun -n 2 -x OPENBLAS_VERBOSE python dbg_scripts/trans_beam_driver.py \
+            > capture/driver_out.txt 2>&1
+          grep -E "FUNC|Core:" capture/driver_out.txt
+          grep -nE "^ *[0-9]+ +[-0-9.e+naNinf]+ |NaN" capture/driver_out.txt | grep -B12 -m1 -E "e\+[2-9][0-9]|nan"
+      - name: Pack build tree
+        run: |
+          cd $TACS_DIR/..
+          tar czf $RUNNER_TEMP/tacs_ci_build.tgz --exclude=tacs/.git tacs
+          ls -la $RUNNER_TEMP/tacs_ci_build.tgz
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tacs-ci-build
+          path: ${{ runner.temp }}/tacs_ci_build.tgz
+          retention-days: 7
