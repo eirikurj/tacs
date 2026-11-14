@@ -43,10 +43,18 @@ class ProblemTest(PyTACSTestCase.PyTACSTest):
             self.rtol = 1e-6
             self.atol = 1e-6
             self.dh = 1e-50
+            # Newton's convergence check sees only the real part of the
+            # residual, so the complex-step perturbation needs extra iterations
+            # past real-part convergence. The unreachable tolerance forces them.
+            newton_tol = 1e-16
         else:
             self.rtol = 2e-3
             self.atol = 1e-3
             self.dh = 1e-8
+            # The real residual bottoms out near 1e-14. A tighter tolerance
+            # makes Newton iterate on round-off, which has produced NaNs on
+            # some CI runners.
+            newton_tol = 1e-12
 
         struct_options = {
             "writeCoordinateFrame": True,
@@ -87,10 +95,9 @@ class ProblemTest(PyTACSTestCase.PyTACSTest):
         tacs_probs = fea_assembler.createTACSProbsFromBDF()
         # Convert from dict to list
         tacs_probs = tacs_probs.values()
-        # Set convergence to be tight for test
         for problem in tacs_probs:
-            problem.setOption("L2Convergence", 1e-16)
-            problem.setOption("L2ConvergenceRel", 1e-16)
+            problem.setOption("L2Convergence", newton_tol)
+            problem.setOption("L2ConvergenceRel", newton_tol)
 
         # Add Functions
         for problem in tacs_probs:
